@@ -1,8 +1,9 @@
-import Data.List (permutations)
+import Data.List (map, permutations)
 
 -- Rule 1: All numbers must be positive naturals
 -- Rule 2: All source numbers can be used once only
 
+-- Arithmetic operators
 data Op = Add | Sub | Mul | Div
 
 instance Show Op where
@@ -19,8 +20,10 @@ apply Div a b = a `div` b
 
 valid :: Op -> Int -> Int -> Bool
 valid Sub a b = a > b
-valid Div x y = x `mod` y == 0
+valid Div a b = a `mod` b == 0
 valid _ _ _ = True
+
+-- Numeric expressions
 
 data Expr = Val Int | App Op Expr Expr
 
@@ -39,20 +42,16 @@ eval :: Expr -> [Int]
 eval (Val n) = [n | n > 0]
 eval (App o e1 e2) = [apply o x y | x <- eval e1, y <- eval e2, valid o x y]
 
-comb :: [Int] -> Int -> [[Int]]
-comb [] _ = []
-comb _ 0 = [[]]
-comb xs 1 = [[x] | x <- xs]
-comb (x : xs) r = [x : xs' | xs' <- comb xs (r - 1)] ++ comb xs r
+-- Combinatorial functions
 
-combTillLength :: [Int] -> Int -> [[Int]]
-combTillLength [] _ = []
-combTillLength _ 0 = [[]]
-combTillLength xs l = combTillLength xs (l - 1) ++ comb xs l
+comb :: [a] -> [[a]]
+comb [] = [[]]
+comb (x : xs) = yss ++ map (x :) yss where yss = comb xs
 
-choices :: [Int] -> [[Int]]
-choices [] = [[]]
-choices xs = [p | c <- combTillLength xs (length xs), p <- permutations c]
+choices :: [a] -> [[a]]
+choices xs = [p | c <- comb xs, p <- permutations c]
+
+-- Formalising the problem
 
 solution :: Expr -> [Int] -> Int -> Bool
 solution e ns n = values e `elem` choices ns && eval e == [n]
