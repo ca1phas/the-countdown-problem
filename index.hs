@@ -24,7 +24,6 @@ valid Div a b = a `mod` b == 0
 valid _ _ _ = True
 
 -- Numeric expressions
-
 data Expr = Val Int | App Op Expr Expr
 
 instance Show Expr where
@@ -40,10 +39,9 @@ values (App _ e1 e2) = values e1 ++ values e2
 
 eval :: Expr -> [Int]
 eval (Val n) = [n | n > 0]
-eval (App o e1 e2) = [apply o x y | x <- eval e1, y <- eval e2, valid o x y]
+eval (App o e1 e2) = [apply o a b | a <- eval e1, b <- eval e2, valid o a b]
 
 -- Combinatorial functions
-
 comb :: [a] -> [[a]]
 comb [] = [[]]
 comb (x : xs) = yss ++ map (x :) yss where yss = comb xs
@@ -52,6 +50,28 @@ choices :: [a] -> [[a]]
 choices xs = [p | c <- comb xs, p <- permutations c]
 
 -- Formalising the problem
-
 solution :: Expr -> [Int] -> Int -> Bool
 solution e ns n = values e `elem` choices ns && eval e == [n]
+
+-- Brute Force Search
+split :: [a] -> [([a], [a])]
+split [] = []
+split [_] = []
+split (x : xs) = ([x], xs) : [(x : as, bs) | (as, bs) <- split xs]
+
+exprs :: [Int] -> [Expr]
+exprs [] = []
+exprs [x] = [Val x]
+exprs xs =
+  [ e
+    | (as, bs) <- split xs,
+      a <- exprs as,
+      b <- exprs bs,
+      e <- combine a b
+  ]
+
+combine :: Expr -> Expr -> [Expr]
+combine a b = [App o a b | o <- [Add, Sub, Mul, Div]]
+
+solutions :: [Int] -> Int -> [Expr]
+solutions ns n = [e | c <- choices ns, e <- exprs c, eval e == [n]]
