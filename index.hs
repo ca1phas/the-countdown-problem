@@ -1,8 +1,5 @@
 import Data.List (map, permutations)
 
--- Rule 1: All numbers must be positive naturals
--- Rule 2: All source numbers can be used once only
-
 -- Arithmetic operators
 data Op = Add | Sub | Mul | Div
 
