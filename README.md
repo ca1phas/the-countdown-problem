@@ -19,7 +19,7 @@ Find an expression (if exists) that yield a given target number using some/all o
 3. Type `[solution_type] [ns] [n]` and press Enter.<br>
    n = the target number e.g. _765_<br>
    ns = the list of numbers e.g. _[1,3,7,10,25,50]_<br>
-   solution*type = <br>
-   a. \_solution* (brute force search), <br>
+   solution_type = <br>
+   a. _solution_ (brute force search), <br>
    b. _solution'_ (combining generation and evaluation), <br>
    c. _solution''_ (exploiting algebraic properties)
