@@ -102,3 +102,31 @@ combine' (e1, a) (e2, b) =
 
 solutions' :: [Int] -> Int -> [Expr]
 solutions' ns n = [e | c <- choices ns, (e, v) <- results c, v == n]
+
+-- Exploiting algebraic properties
+valid' :: Op -> Int -> Int -> Bool
+valid' Sub a b = a > b
+valid' Add a b = a <= b
+valid' Div a b = b /= 1 && a `mod` b == 0
+valid' Mul a b = a <= b && a /= 1 && b /= 1
+
+results' :: [Int] -> [Result]
+results' [] = []
+results' [n] = [(Val n, n) | n > 0]
+results' ns =
+  [ r
+    | (as, bs) <- split ns,
+      ra <- results' as,
+      rb <- results' bs,
+      r <- combine'' ra rb
+  ]
+
+combine'' :: Result -> Result -> [Result]
+combine'' (e1, a) (e2, b) =
+  [ (App o e1 e2, apply o a b)
+    | o <- ops,
+      valid' o a b
+  ]
+
+solutions'' :: [Int] -> Int -> [Expr]
+solutions'' ns n = [e | c <- choices ns, (e, v) <- results' c, v == n]
