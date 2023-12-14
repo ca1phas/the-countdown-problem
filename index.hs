@@ -6,6 +6,9 @@ import Data.List (map, permutations)
 -- Arithmetic operators
 data Op = Add | Sub | Mul | Div
 
+ops :: [Op]
+ops = [Add, Sub, Mul, Div]
+
 instance Show Op where
   show Add = "+"
   show Sub = "-"
@@ -71,7 +74,31 @@ exprs xs =
   ]
 
 combine :: Expr -> Expr -> [Expr]
-combine a b = [App o a b | o <- [Add, Sub, Mul, Div]]
+combine a b = [App o a b | o <- ops]
 
 solutions :: [Int] -> Int -> [Expr]
 solutions ns n = [e | c <- choices ns, e <- exprs c, eval e == [n]]
+
+-- Combining generation and evaluation
+type Result = (Expr, Int)
+
+results :: [Int] -> [Result]
+results [] = []
+results [n] = [(Val n, n) | n > 0]
+results ns =
+  [ r
+    | (as, bs) <- split ns,
+      ra <- results as,
+      rb <- results bs,
+      r <- combine' ra rb
+  ]
+
+combine' :: Result -> Result -> [Result]
+combine' (e1, a) (e2, b) =
+  [ (App o e1 e2, apply o a b)
+    | o <- ops,
+      valid o a b
+  ]
+
+solutions' :: [Int] -> Int -> [Expr]
+solutions' ns n = [e | c <- choices ns, (e, v) <- results c, v == n]
